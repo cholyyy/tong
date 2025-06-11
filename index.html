@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>安眠彩洞遊戲</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom, #d0e8f2, #fef6e4);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(3, 110px);
+      grid-gap: 15px;
+      justify-content: center;
+      margin: 20px auto;
+      touch-action: manipulation;
+    }
+    .hole {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      animation: pulse 4s infinite ease-in-out;
+    }
+    .hole:nth-child(1) { background: #ffd6e0; }
+    .hole:nth-child(2) { background: #fce38a; }
+    .hole:nth-child(3) { background: #95e1d3; }
+    .hole:nth-child(4) { background: #ffb6b9; }
+    .hole:nth-child(5) { background: #c5f6fa; }
+    .hole:nth-child(6) { background: #fcd5ce; }
+    .hole:nth-child(7) { background: #e0bbf9; }
+    .hole:nth-child(8) { background: #caffbf; }
+    .hole:nth-child(9) { background: #b5ead7; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .girl {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: none;
+    }
+    .show {
+      display: block;
+    }
+    #score, #timer {
+      font-size: 26px;
+      margin: 10px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 20px;
+      background: #8ecae6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: #219ebc;
+    }
+  </style>
+</head>
+<body>
+  <h1>唐仔遊戲</h1>
+  <div id="score">得分：0</div>
+  <div id="timer">時間：60</div>
+  <button onclick="startGame()">開始</button>
+  <div id="game"></div>
+
+  <script>
+    const game = document.getElementById('game');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    let score = 0;
+    let timeLeft = 60;
+    let intervalId;
+    let spawnSpeed = 1000;
+    let activeGirls = [];
+    const girlImgSrc = 'yl.png';
+
+    for (let i = 0; i < 9; i++) {
+      const hole = document.createElement('div');
+      hole.className = 'hole';
+      const img = document.createElement('img');
+      img.src = girlImgSrc;
+      img.className = 'girl';
+      img.addEventListener('touchstart', () => {
+        if (img.classList.contains('show')) {
+          score++;
+          scoreDisplay.textContent = '得分：' + score;
+          img.classList.remove('show');
+        }
+      }, { passive: true });
+      img.addEventListener('click', () => {
+        if (img.classList.contains('show')) {
+          score++;
+          scoreDisplay.textContent = '得分：' + score;
+          img.classList.remove('show');
+        }
+      });
+      hole.appendChild(img);
+      game.appendChild(hole);
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 60;
+      spawnSpeed = 1000;
+      scoreDisplay.textContent = '得分：0';
+      timerDisplay.textContent = '時間：60';
+      clearInterval(intervalId);
+      clearTimeout(spawnTimeout);
+      intervalId = setInterval(updateTimer, 1000);
+      spawnGirls();
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      timerDisplay.textContent = '時間：' + timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(intervalId);
+        clearTimeout(spawnTimeout);
+        alert('遊戲結束！您的得分：' + score);
+      }
+    }
+
+    let spawnTimeout;
+    function spawnGirls() {
+      const girls = document.querySelectorAll('.girl');
+      girls.forEach(girl => girl.classList.remove('show'));
+
+      let count = 1;
+      if (timeLeft <= 40 && timeLeft > 20) {
+        count = 2;
+      } else if (timeLeft <= 20 && timeLeft > 10) {
+        count = 3;
+      } else if (timeLeft <= 10) {
+        count = 4;
+      }
+
+      const indices = [];
+      while (indices.length < count) {
+        const index = Math.floor(Math.random() * 9);
+        if (!indices.includes(index)) {
+          indices.push(index);
+        }
+      }
+
+      indices.forEach(index => {
+        const girl = girls[index];
+        girl.classList.add('show');
+        setTimeout(() => {
+          girl.classList.remove('show');
+        }, spawnSpeed * 0.8);
+      });
+
+      if (timeLeft > 0) {
+        spawnSpeed = Math.max(200, 1000 - (60 - timeLeft) * 12);
+        spawnTimeout = setTimeout(spawnGirls, spawnSpeed);
+      }
+    }
+  </script>
+</body>
+</html>
