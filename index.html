@@ -139,7 +139,7 @@
       if (timeLeft <= 0) {
         clearInterval(intervalId);
         clearTimeout(spawnTimeout);
-        alert('遊戲結束！唐唐得分：' + score );
+        alert('遊戲結束！唐唐得分：' + score);
       }
     }
 
@@ -153,8 +153,10 @@
         count = 2;
       } else if (timeLeft <= 20 && timeLeft > 10) {
         count = 3;
-      } else if (timeLeft <= 10) {
+      } else if (timeLeft <= 10 && timeLeft > 2) {
         count = 4;
+      } else if (timeLeft <= 2) {
+        count = 9; // 
       }
 
       const indices = [];
